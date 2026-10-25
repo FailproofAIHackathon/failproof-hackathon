@@ -1,52 +1,36 @@
-# ⛽ Trip Fuel Cost Calculator
+# Yatra - the road-trip agent that can't hallucinate
 
-A small, dependency-free web app that estimates how much fuel a road trip needs and what it will cost — and splits that cost fairly between everyone travelling.
+**Built at Hacktober Hack (Failproof AI x Quad AI), Bengaluru, 25 Oct 2026.**
 
-## What it does
+LLM travel agents fail in three quiet ways: they **invent places**, they **get the maths wrong**, and they **ignore your budget**. A better prompt doesn't fix that - the model still passes once and fails on repeat.
 
-Enter:
+**Yatra** is a Claude Code agent that plans Indian road trips and splits fuel costs. Its reliability doesn't come from the prompt - it comes from **Failproof AI policies that check every plan before it is written**.
 
-- **Distance** (km, one way)
-- **Vehicle mileage** (km per litre)
-- **Fuel price** (₹ per litre)
-- **Number of travellers**
-- **Round trip** checkbox (doubles the distance)
+## How Failproof is used
 
-And instantly see:
+| Layer | What it does |
+|---|---|
+| **Custom policies** (`.failproofai/policies/yatra-policies.mjs`) | `yatra-no-invented-places` blocks any stop not in the verified dataset and suggests real ones. `yatra-verified-math` recomputes the plan with the same deterministic code as the agent's tool and blocks wrong numbers. `yatra-budget-guard` blocks over-budget plans. `yatra-plan-must-be-verifiable` forces whole-JSON writes. `yatra-use-the-tool` injects the rules into every prompt. |
+| **Built-in policy pack** (FailproofAI/policies) | Secrets sanitised, `.env` reads blocked, no `sudo`, no `rm -rf`, no push to `main`. |
+| **Observability** (app.befailproof.ai) | Every tool call, every block and every retry is traced, so you can replay exactly where the agent tried to hallucinate and how it recovered. |
 
-- **Litres of fuel needed**
-- **Total fuel cost** (₹)
-- **Cost per person** (₹)
+Key idea: **the agent's tool and the guardrail share one source of truth (`tools/geo.mjs`)**, so a deny message tells the agent exactly how to fix itself. Blocks become self-correction, not dead ends.
 
-Results update live as you type, with validation for empty or invalid values. The layout is responsive (works on phones) and follows your system's light/dark theme.
+## Try it
 
-**Formula**
-
+```bash
+npm i -g failproofai && failproofai config && failproofai policies add FailproofAI/policies
+cd yatra && claude
 ```
-total distance = distance × (round trip ? 2 : 1)
-litres needed  = total distance ÷ mileage
-total cost     = litres needed × fuel price
-per person     = total cost ÷ travellers
-```
+Then ask:
+> Plan a round trip from Bengaluru to Coorg and Atlantis for 4 friends, 15 km/l, petrol Rs 102.5, budget Rs 3000.
 
-## How to run
+Watch Failproof block "Atlantis", block any hand-computed cost, and block the plan if it breaks the budget - the agent then fixes itself and writes a verified plan to `trips/`.
 
-No build step, no server, no API keys.
-
-1. Clone or download this repository.
-2. Open `index.html` in any modern web browser (double-click it).
-
-That's it — everything (HTML, CSS and JavaScript) lives in that single file.
-
-## Built by an AI coding agent, guarded by Failproof AI
-
-This app was written by an AI coding agent rather than by hand. The agent's work was **monitored and guarded by [Failproof AI](https://github.com/FailproofAIHackathon)** throughout the session:
-
-- **Every tool call is recorded.** Failproof AI hooks into the agent's tool-use lifecycle, so each file read, file write and shell command the agent attempts is logged — giving a full, auditable trail of how the code was produced.
-- **Policies block dangerous actions before they run.** Guardrail policies intercept risky operations and stop them, for example:
-  - reading secrets such as `.env` files,
-  - pushing directly to the `main` branch,
-  - running commands with `sudo`,
-  - destructive deletes like `rm -rf`.
-
-The result: the speed of an autonomous coding agent, with a human-auditable record and hard safety limits on what it is allowed to do.
+## Files
+- `CLAUDE.md` - agent brief
+- `tools/route.mjs` - deterministic distance/cost tool
+- `tools/geo.mjs` - shared maths (tool + policies)
+- `data/cities.json` - verified places
+- `.failproofai/policies/yatra-policies.mjs` - the guardrails
+- `index.html` - companion fuel-cost calculator UI
