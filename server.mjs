@@ -4,6 +4,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import { execFile } from "node:child_process";
 
 const root = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
 function loadEnv() {
@@ -19,6 +20,19 @@ let TOKEN = process.env.MAPPLS_TOKEN || process.env.MAPPLS_API_KEY || "";
 const PORT = Number(process.env.PORT || 4173);
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png" };
 
+// Encoded polyline -> [[lng,lat]]; tries precision 6 then 5 and keeps the one that lands in India.
+function decodePolyline(str) {
+  for (const prec of [6, 5]) {
+    const f = Math.pow(10, prec), out = []; let i = 0, lat = 0, lng = 0;
+    while (i < str.length) {
+      for (const k of [0, 1]) { let b, sh = 0, res = 0; do { b = str.charCodeAt(i++) - 63; res |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+        const d = res & 1 ? ~(res >> 1) : res >> 1; if (k === 0) lat += d; else lng += d; }
+      out.push([lng / f, lat / f]);
+    }
+    if (out.length && out.every(([x, y]) => x > 60 && x < 100 && y > 5 && y < 40)) return out;
+  }
+  return [];
+}
 async function proxy(res, url) {
   try {
     const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -46,6 +60,37 @@ http.createServer(async (req, res) => {
     const lines = fs.existsSync(f) ? fs.readFileSync(f, "utf8").split(/\r?\n/).filter((l) => l && !/^\s*MAPPLS_TOKEN\s*=/.test(l)) : [];
     lines.push("MAPPLS_TOKEN=" + t); fs.writeFileSync(f, lines.join("\n") + "\n");
     TOKEN = t; res.writeHead(200, { "Content-Type": "application/json" }); return res.end('{"ok":true}');
+  }
+  if (u.pathname === "/api/evals") {
+    // run the pass^3 eval suite against the real Failproof policies
+    return execFile(process.execPath, [path.join(root, "evals", "run.mjs"), "--json"], { cwd: root, timeout: 30000 }, (err, stdout) => {
+      res.writeHead(stdout ? 200 : 500, { "Content-Type": "application/json" }); res.end(stdout || JSON.stringify({ error: String(err) }));
+    });
+  }
+  if (u.pathname === "/api/route") {
+    // Real road route from Mappls (route_adv). coords = "lng,lat;lng,lat;..."
+    const coords = (u.searchParams.get("coords") || "").replace(/[^0-9.,;-]/g, "");
+    const q = "geometries=geojson&overview=full&alternatives=2&steps=false";
+    const urls = [
+      // same Route ETA call as the "Mappls ai testing" project (polyline precision 1e5)
+      `https://route.mappls.com/route/direction/route_eta/driving/${coords}?access_token=${T}&alternatives=2&geometries=polyline&overview=full&steps=false&isSort=true`,
+      `https://route.mappls.com/route/direction/route_adv/driving/${coords}?access_token=${T}&${q}`,
+      `https://apis.mappls.com/advancedmaps/v1/${T}/route_adv/driving/${coords}?${q}`,
+    ];
+    for (const url of urls) {
+      try {
+        const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!r.ok) { console.log("Mappls route " + r.status + " from " + url.split("?")[0].replace(T, "<token>")); continue; }
+        const j = await r.json();
+        const routes = (j.routes || []).map((rt) => ({
+          km: Math.round((rt.distance || 0) / 100) / 10,
+          min: Math.round((rt.duration || 0) / 60),
+          coords: typeof rt.geometry === "string" ? decodePolyline(rt.geometry) : (rt.geometry && rt.geometry.coordinates) || [],
+        })).filter((x) => x.km > 0);
+        if (routes.length) { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ routes })); }
+      } catch (e) { console.log("Mappls route error: " + e.message); }
+    }
+    res.writeHead(502, { "Content-Type": "application/json" }); return res.end('{"error":"no route from Mappls"}');
   }
   if (u.pathname === "/api/autosuggest")
     return proxy(res, `https://search.mappls.com/search/places/autosuggest/json?access_token=${T}&query=${encodeURIComponent(u.searchParams.get("query") || "")}&region=IND&tokenizeAddress&richData=true`);

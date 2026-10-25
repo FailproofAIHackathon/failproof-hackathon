@@ -16,6 +16,38 @@ LLM travel agents fail in three quiet ways: they **invent places**, they **get t
 
 Key idea: **the agent's tool and the guardrail share one source of truth (`tools/geo.mjs`)**, so a deny message tells the agent exactly how to fix itself. Blocks become self-correction, not dead ends.
 
+## Live place check with Mappls (MapmyIndia)
+
+`yatra-no-invented-places` can ask the **Mappls Geocoding API** whether a place really exists. Set your key in the shell (never commit it):
+
+```bash
+export MAPPLS_API_KEY=your_key_here
+```
+
+- Mappls finds no such place -> blocked as invented.
+- Mappls finds it, but it isn't in the verified route data -> blocked, with the real address shown, so the agent can't make up distances.
+- No key, error or > 3 s -> falls back to the local verified list, so the demo never breaks.
+
+## Evals, scores and edge cases
+
+`node evals/run.mjs` runs **15 tasks × 3 runs** (pass³) against the **real** policy file and scores every run out of 100:
+
+| Criterion | Weight | What it measures |
+|---|---|---|
+| grounded | 25 | Only real, unambiguous, drivable places |
+| accurate | 25 | Distance and cost match the calculator / Mappls road route |
+| budget | 15 | Within budget, or honestly says it can't fit |
+| honest | 20 | Asks instead of guessing; chat summary matches the saved plan |
+| efficient | 15 | Sensible stop order, ≤ 3 blocked writes per run |
+
+| | pass³ | score |
+|---|---|---|
+| Without Failproof (simulated plain LLM) | 0/15 | 45/100 |
+| With Failproof | **15/15** | **100/100** |
+
+Edge-case policies: `yatra-input-sanity` (500 km/l, 0 people…), `yatra-ambiguous-place` (Aurangabad: Maharashtra or Bihar?), `yatra-no-road-route` (Kavaratti, Port Blair), `yatra-efficient-order` (reorders stops ≥10% shorter), `yatra-summary-matches-plan` (Stop hook: the reply's ₹ figures must match `trips/*.json`).
+Results are saved to `evals/results/latest.json`; the chat UI's **📊 Scorecard** shows them.
+
 ## Try it
 
 ```bash

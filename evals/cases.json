@@ -1,0 +1,213 @@
+[
+ {
+  "id": "E01",
+  "ask": "Round trip Bengaluru to Coorg and Atlantis, 4 friends, 15 km/l, Rs 102.5, budget 3000",
+  "stops": [
+   "Bengaluru",
+   "Coorg",
+   "Atlantis"
+  ],
+  "round": true,
+  "mileage": 15,
+  "price": 102.5,
+  "people": 4,
+  "budget": 3000
+ },
+ {
+  "id": "E02",
+  "ask": "Chennai to Pondicherry and Wakanda round trip, 2 people, 14 km/l, Rs 101, budget 1500",
+  "stops": [
+   "Chennai",
+   "Pondicherry",
+   "Wakanda"
+  ],
+  "round": true,
+  "mileage": 14,
+  "price": 101,
+  "people": 2,
+  "budget": 1500
+ },
+ {
+  "id": "E03",
+  "ask": "Delhi to Agra and Jaipur, 3 people, 16 km/l, Rs 96",
+  "stops": [
+   "Delhi",
+   "Agra",
+   "Jaipur"
+  ],
+  "round": false,
+  "mileage": 16,
+  "price": 96,
+  "people": 3,
+  "budget": 0
+ },
+ {
+  "id": "E04",
+  "ask": "Bengaluru to Mysuru and Ooty, 3 people, 18 km/l, Rs 103, budget 4000",
+  "stops": [
+   "Bengaluru",
+   "Mysuru",
+   "Ooty"
+  ],
+  "round": false,
+  "mileage": 18,
+  "price": 103,
+  "people": 3,
+  "budget": 4000
+ },
+ {
+  "id": "E05",
+  "ask": "Mumbai to Pune to Hogwarts, 2 people, 12 km/l, Rs 104",
+  "stops": [
+   "Mumbai",
+   "Pune",
+   "Hogwarts"
+  ],
+  "round": false,
+  "mileage": 12,
+  "price": 104,
+  "people": 2,
+  "budget": 0
+ },
+ {
+  "id": "E06",
+  "ask": "Hyderabad to Hampi round trip, 5 friends, 15 km/l, Rs 107, budget 2000",
+  "stops": [
+   "Hyderabad",
+   "Hampi"
+  ],
+  "round": true,
+  "mileage": 15,
+  "price": 107,
+  "people": 5,
+  "budget": 2000
+ },
+ {
+  "id": "E07",
+  "ask": "Kochi to Madurai, 2 people, 20 km/l, Rs 105, budget 5000",
+  "stops": [
+   "Kochi",
+   "Madurai"
+  ],
+  "round": false,
+  "mileage": 20,
+  "price": 105,
+  "people": 2,
+  "budget": 5000
+ },
+ {
+  "id": "E08",
+  "ask": "Goa to Mangaluru to El Dorado to Kochi, 4 people, 14 km/l, Rs 98, budget 6000",
+  "stops": [
+   "Goa",
+   "Mangaluru",
+   "El Dorado",
+   "Kochi"
+  ],
+  "round": false,
+  "mileage": 14,
+  "price": 98,
+  "people": 4,
+  "budget": 6000
+ },
+ {
+  "id": "E09",
+  "ask": "Delhi to Bengaluru, 1 person, 15 km/l, Rs 102.5, budget 1000",
+  "stops": [
+   "Delhi",
+   "Bengaluru"
+  ],
+  "round": false,
+  "mileage": 15,
+  "price": 102.5,
+  "people": 1,
+  "budget": 1000
+ },
+ {
+  "id": "E10",
+  "ask": "Coimbatore to Ooty round trip, 4 people, 12 km/l, Rs 104, budget 800",
+  "stops": [
+   "Coimbatore",
+   "Ooty"
+  ],
+  "round": true,
+  "mileage": 12,
+  "price": 104,
+  "people": 4,
+  "budget": 800
+ },
+ {
+  "id": "E11",
+  "ask": "Aurangabad to Pune, 3 people, 15 km/l, Rs 104",
+  "stops": [
+   "Aurangabad",
+   "Pune"
+  ],
+  "round": false,
+  "mileage": 15,
+  "price": 104,
+  "people": 3,
+  "budget": 0,
+  "expect": "ask",
+  "why": "ambiguous place"
+ },
+ {
+  "id": "E12",
+  "ask": "Road trip Kochi to Kavaratti, 2 people, 15 km/l, Rs 105",
+  "stops": [
+   "Kochi",
+   "Kavaratti"
+  ],
+  "round": false,
+  "mileage": 15,
+  "price": 105,
+  "people": 2,
+  "budget": 0,
+  "expect": "ask",
+  "why": "no road route"
+ },
+ {
+  "id": "E13",
+  "ask": "Bengaluru to Mysuru, 2 people, 500 km/l, Rs 102",
+  "stops": [
+   "Bengaluru",
+   "Mysuru"
+  ],
+  "round": false,
+  "mileage": 500,
+  "price": 102,
+  "people": 2,
+  "budget": 0,
+  "expect": "ask",
+  "why": "impossible mileage"
+ },
+ {
+  "id": "E14",
+  "ask": "Chennai to Madurai, 3 people, 17 km/l, Rs 101 - give me the total in the reply",
+  "stops": [
+   "Chennai",
+   "Madurai"
+  ],
+  "round": false,
+  "mileage": 17,
+  "price": 101,
+  "people": 3,
+  "budget": 0,
+  "checkSummary": true
+ },
+ {
+  "id": "E15",
+  "ask": "Bengaluru to Goa, Mysuru and Coorg then back to Bengaluru, 4 people, 15 km/l, Rs 102.5",
+  "stops": [
+   "Bengaluru",
+   "Goa",
+   "Mysuru",
+   "Coorg"
+  ],
+  "round": true,
+  "mileage": 15,
+  "price": 102.5,
+  "people": 4,
+  "budget": 0
+ }
+]

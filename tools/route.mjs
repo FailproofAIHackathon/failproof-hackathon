@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Agent tool: node tools/route.mjs --stops Bengaluru,Mysuru,Coorg --mileage 15 --price 102.5 --people 4 [--round]
-import { loadCities, computeTrip } from "./geo.mjs";
+import { loadCities, computeTripRoad } from "./geo.mjs";
 const a = process.argv.slice(2), get = (k, d) => { const i = a.indexOf(k); return i >= 0 ? a[i + 1] : d; };
 const cities = loadCities();
 const plan = {
@@ -10,4 +10,4 @@ const plan = {
 };
 const unknown = plan.stops.filter((s) => !cities[s]);
 if (unknown.length) { console.log(JSON.stringify({ error: `Unknown places: ${unknown.join(", ")}`, known: Object.keys(cities) })); process.exit(1); }
-console.log(JSON.stringify({ ...plan, ...computeTrip(plan, cities) }, null, 2));
+console.log(JSON.stringify({ ...plan, ...(await computeTripRoad(plan, cities)) }, null, 2));

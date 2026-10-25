@@ -1,0 +1,18 @@
+{
+ "mileageKmpl": [
+  5,
+  40
+ ],
+ "fuelPricePerL": [
+  80,
+  130
+ ],
+ "travellers": [
+  1,
+  10
+ ],
+ "budget": [
+  0,
+  1000000
+ ]
+}
