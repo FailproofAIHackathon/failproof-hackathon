@@ -37,6 +37,7 @@ export function closest(name, cities) {
 
 // ---- Actual road route from Mappls (route_adv). Used by the agent's tool AND the Failproof policy. ----
 function mapplsToken(root) {
+  if (process.env.YATRA_OFFLINE) return ""; // evals run offline so they are deterministic
   if (process.env.MAPPLS_TOKEN || process.env.MAPPLS_API_KEY) return process.env.MAPPLS_TOKEN || process.env.MAPPLS_API_KEY;
   try {
     const m = fs.readFileSync(path.join(root, ".env"), "utf8").match(/^\s*MAPPLS_TOKEN\s*=\s*["']?([^"'\r\n]+)/m);

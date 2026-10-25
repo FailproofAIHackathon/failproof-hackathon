@@ -65,7 +65,7 @@ http.createServer(async (req, res) => {
   }
   if (u.pathname === "/api/evals") {
     // run the pass^3 eval suite against the real Failproof policies
-    return execFile(process.execPath, [path.join(root, "evals", "run.mjs"), "--json"], { cwd: root, timeout: 30000 }, (err, stdout) => {
+    return execFile(process.execPath, [path.join(root, "evals", "run.mjs"), "--json"], { cwd: root, timeout: 30000, env: { ...process.env, YATRA_OFFLINE: "1" } }, (err, stdout) => {
       res.writeHead(stdout ? 200 : 500, { "Content-Type": "application/json" }); res.end(stdout || JSON.stringify({ error: String(err) }));
     });
   }
@@ -98,11 +98,12 @@ http.createServer(async (req, res) => {
     // Send this chat turn to Failproof as a custom-agent session (python failproofai-sdk -> local daemon -> cloud).
     let body = ""; for await (const c of req) body += c;
     const child = execFile("python3", [path.join(root, "tools", "fp_log.py")], { cwd: root, timeout: 20000 }, (err, out, errOut) => {
-      if (err) console.log("Failproof trace not sent: " + String(errOut || err.message).split("\n").slice(-2).join(" "));
-      else console.log("Failproof trace sent: " + String(out).trim());
+      const msg = err ? String(errOut || err.message).trim().split("\n").slice(-1)[0] : String(out).trim();
+      console.log(err ? "Failproof trace NOT sent: " + msg : "Failproof trace written: " + msg);
+      res.writeHead(err ? 500 : 200, { "Content-Type": "application/json" }); res.end(JSON.stringify({ ok: !err, msg }));
     });
     child.stdin.end(body);
-    res.writeHead(202, { "Content-Type": "application/json" }); return res.end('{"queued":true}');
+    return;
   }
   if (u.pathname === "/api/autosuggest")
     return proxy(res, `https://search.mappls.com/search/places/autosuggest/json?access_token=${T}&query=${encodeURIComponent(u.searchParams.get("query") || "")}&region=IND&tokenizeAddress&richData=true`);

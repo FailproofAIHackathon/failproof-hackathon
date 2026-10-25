@@ -140,6 +140,7 @@ form button{border-radius:14px;padding:0 24px;background:linear-gradient(135deg,
 .ms-route{display:flex;align-items:center;gap:6px;font-weight:700;flex-wrap:wrap}.msum .via{background:#eef2ff;color:#4338ca;border-radius:999px;padding:1px 8px;font-size:11.5px}
 .ms-kpi{display:flex;gap:16px;margin-top:8px}.ms-kpi b{display:block;font-size:16px}.ms-kpi small{color:#64748b;font-size:11px}
 .ms-alt{margin-top:6px;color:#64748b;font-size:11.5px}
+.mapbox.fs{position:fixed!important;inset:12px;z-index:40;border-radius:20px}
 </style>
 </head>
 <body>
@@ -155,7 +156,7 @@ form button{border-radius:14px;padding:0 24px;background:linear-gradient(135deg,
 </div>
 <form id="f"><input id="q" placeholder="Plan a trip… e.g. Bengaluru to Coorg for 4 friends, 15 km/l, Rs 102.5, budget Rs 3000" autocomplete="off"><button>Send</button></form>
 <div class="note" id="note">Browser demo of Yatra's guardrails. In the real agent these checks run as Failproof AI policies (.failproofai/policies/yatra-policies.mjs) on every Claude Code tool call.</div></div>
-<aside class="right"><div class="mh"><b>🗺️ Live map</b><span id="mstat">offline map</span><input id="mkey" type="password" placeholder="Mappls static key"><button id="mconn">Use Mappls</button></div><div class="mapbox"><svg id="map" viewBox="0 0 340 460"></svg><div id="mmap"></div><div class="msum" id="msum"></div><div class="mctl" id="mctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><div class="sep"></div><button id="zfit" title="Fit route">⤢</button><button id="z3d" title="Tilt 3D">◭</button></div></div><div class="stopbox" id="stopbox" style="display:none"><input id="auto" placeholder="🔎 Mappls autosuggest: add a place"></div><div class="lg"><span><i class="dot" style="background:#10b981"></i>verified route</span><span><i class="dot" style="background:#f59e0b"></i>checking</span><span><i class="dot" style="background:#ef4444"></i>unguarded / blocked</span><span><i class="dot" style="background:#10b981"></i>start pin</span><span><i class="dot" style="background:#ef4444"></i>destination flag</span><span><i class="dot" style="background:#6366f1"></i>stop</span></div></aside></div>
+<aside class="right"><div class="mh"><b>🗺️ Live map</b><span id="mstat">offline map</span><input id="mkey" type="password" placeholder="Mappls static key"><button id="mconn">Use Mappls</button></div><div class="mapbox"><svg id="map" viewBox="0 0 340 460"></svg><div id="mmap"></div><div class="msum" id="msum"></div><div class="mctl" id="mctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><div class="sep"></div><button id="zfit" title="Fit route">◎</button><button id="zfs" title="Full screen">⛶</button><button id="z3d" title="Tilt 3D">◭</button></div></div><div class="stopbox" id="stopbox" style="display:none"><input id="auto" placeholder="🔎 Mappls autosuggest: add a place"></div><div class="lg"><span><i class="dot" style="background:#10b981"></i>verified route</span><span><i class="dot" style="background:#f59e0b"></i>checking</span><span><i class="dot" style="background:#ef4444"></i>unguarded / blocked</span><span><i class="dot" style="background:#10b981"></i>start pin</span><span><i class="dot" style="background:#ef4444"></i>destination flag</span><span><i class="dot" style="background:#6366f1"></i>stop</span></div></aside></div>
 <script>
 const CITIES={"Bengaluru":[12.9716,77.5946],"Mysuru":[12.2958,76.6394],"Coorg":[12.4244,75.7382],"Chikkamagaluru":[13.3161,75.7720],"Ooty":[11.4102,76.6950],"Coimbatore":[11.0168,76.9558],"Chennai":[13.0827,80.2707],"Pondicherry":[11.9416,79.8083],"Tirupati":[13.6288,79.4192],"Madurai":[9.9252,78.1198],"Kochi":[9.9312,76.2673],"Mangaluru":[12.9141,74.8560],"Hampi":[15.3350,76.4600],"Goa":[15.4909,73.8278],"Hyderabad":[17.3850,78.4867],"Pune":[18.5204,73.8567],"Mumbai":[19.0760,72.8777],"Delhi":[28.6139,77.2090],"Agra":[27.1767,78.0081],"Jaipur":[26.9124,75.7873]};
 const ROAD=1.3, log=document.getElementById('log');
@@ -168,7 +169,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 let TRACE=[],TURN=[];
 function shipTurn(){if(!TURN.length)return;const body=JSON.stringify({sessionId:'yatra-'+Date.now(),events:TURN});TURN=[];
   fetch((location.protocol.startsWith('http')?'':'http://localhost:4173')+'/api/trace',{method:'POST',headers:{'Content-Type':'application/json'},body})
-  .then(r=>r.json().then(j=>toast(r.ok?'📤 written for Failproof: '+j.msg:'⚠ Failproof SDK error: '+j.msg,r.ok)).catch(()=>toast('⚠ server is the old version: restart node server.mjs',false))).catch(()=>toast('⚠ Not sent to Failproof: start the server (node server.mjs)',false));}
+  .then(r=>r.json().then(j=>toast(j.msg===undefined?'⚠ Old server running: press Ctrl+C and restart node server.mjs':(r.ok?'📤 written for Failproof: '+j.msg:'⚠ Failproof SDK error: '+j.msg),r.ok&&j.msg!==undefined)).catch(()=>toast('⚠ server is the old version: restart node server.mjs',false))).catch(()=>toast('⚠ Not sent to Failproof: start the server (node server.mjs)',false));}
 function toast(m,ok){const t=document.createElement('div');t.textContent=m;t.style.cssText=`position:fixed;left:20px;bottom:20px;z-index:60;padding:10px 14px;border-radius:12px;font:600 13px Inter,sans-serif;color:#fff;background:${ok?'#065f46':'#7f1d1d'};box-shadow:0 8px 24px rgba(0,0,0,.4)`;document.body.appendChild(t);setTimeout(()=>t.remove(),4000);}
 function turnEv(cls,html){const txt=String(html).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
   if(cls.includes('user'))TURN.push({type:'user',text:txt});else if(cls.includes('bot'))TURN.push({type:'bot',text:txt.slice(0,400)});
@@ -392,9 +393,15 @@ function popupHtml(kind,name,extra){const t={start:'Start',end:'Destination',via
   return `<div style="font:13px Inter,Arial;min-width:140px"><div style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:${kind==='block'?'#b91c1c':'#64748b'}">${t}</div><b style="font-size:14px">${esc(name)}</b>${extra?`<div style="color:#475569;margin-top:3px">${extra}</div>`:''}</div>`;}
 let pinLayers=[];
 function clearPins(){pinLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){}});pinLayers=[];}
-function addPin(kind,name,[lat,lng],label,extra){if(!MM)return;try{
-  const m=new mappls.Marker({map:MM,position:{lat,lng},icon:pinSvg(kind,label),width:40,height:52,offset:[0,-24],popupHtml:popupHtml(kind,name,extra),fitbounds:false});
-  pinLayers.push(m);mLayers.push(m);}catch(e){try{const m=new mappls.Marker({map:MM,position:{lat,lng},popupHtml:popupHtml(kind,name,extra)});pinLayers.push(m);mLayers.push(m);}catch(_){}}}
+function pinHtml(kind,label){const u=pinSvg(kind,label);return `<img src="${u}" width="40" height="52" style="display:block;transform:translate(0,-24px);filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));cursor:pointer">`;}
+function addPin(kind,name,[lat,lng],label,extra){if(!MM)return;let m=null;
+  // 1) HTML marker (most reliable across Mappls SDK versions)
+  try{m=new mappls.Marker({map:MM,position:{lat,lng},html:pinHtml(kind,label),width:40,height:52,popupHtml:popupHtml(kind,name,extra),fitbounds:false});}catch(e){m=null;}
+  // 2) icon URL served by server.mjs
+  if(!m){try{m=new mappls.Marker({map:MM,position:{lat,lng},icon:location.origin+'/pin?kind='+kind+'&label='+encodeURIComponent(label||''),width:40,height:52,popupHtml:popupHtml(kind,name,extra),fitbounds:false});}catch(e){m=null;}}
+  // 3) default marker
+  if(!m){try{m=new mappls.Marker({map:MM,position:{lat,lng},popupHtml:popupHtml(kind,name,extra)});}catch(e){}}
+  if(m){pinLayers.push(m);mLayers.push(m);}}
 function mPin(name,[lat,lng]){if(!MM)return;addPin('tmp',name,[lat,lng],'•');
   try{MM.flyTo({center:[lng,lat],zoom:Math.max(MM.getZoom?MM.getZoom():6,6),duration:700});}catch(e){}}
 function mBlocked(name,pos){if(!MM)return;addPin('block',name,pos,'','Not a verified place');}
@@ -426,6 +433,10 @@ function wireCtl(){const g=id=>document.getElementById(id);g('mctl').style.displ
   g('zin').onclick=()=>{try{MM.zoomIn?MM.zoomIn():MM.setZoom(MM.getZoom()+1);}catch(e){}};
   g('zout').onclick=()=>{try{MM.zoomOut?MM.zoomOut():MM.setZoom(MM.getZoom()-1);}catch(e){}};
   g('zfit').onclick=()=>{if(lastFit.length)fitTo(lastFit);else try{MM.flyTo({center:[78.5,15.5],zoom:4.6});}catch(e){}};
+  g('zfs').onclick=()=>{const box=document.querySelector('.mapbox');const on=!box.classList.contains('fs');
+    box.classList.toggle('fs',on);g('zfs').textContent=on?'✕':'⛶';g('zfs').title=on?'Exit full screen':'Full screen';
+    setTimeout(()=>{try{MM.resize();}catch(e){}if(lastFit.length)fitTo(lastFit);},250);};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.querySelector('.mapbox.fs'))g('zfs').click();});
   let tilt=false;g('z3d').onclick=()=>{tilt=!tilt;try{MM.easeTo?MM.easeTo({pitch:tilt?55:0,duration:600}):MM.setPitch(tilt?55:0);}catch(e){}};}
 function mDirections(stops){if(!MM||typeof mappls.direction!=='function')return;try{ // real road route for the verified plan
   const a=CITIES[stops[0]],b=CITIES[stops[stops.length-1]];

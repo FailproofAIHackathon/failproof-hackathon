@@ -3,6 +3,7 @@
 // Each task runs 3 times (pass^3) WITHOUT and WITH the real Failproof policies, and every run is scored
 // on 5 criteria (see SCORING below). Usage: node evals/run.mjs   (--json for machine output)
 import { register } from "node:module";
+process.env.YATRA_OFFLINE = "1"; // deterministic: no live Mappls calls during evals
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL, fileURLToPath } from "node:url";
