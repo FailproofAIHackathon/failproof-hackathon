@@ -66,7 +66,7 @@ header{padding:14px 22px;gap:14px;background:rgba(11,13,20,.6);backdrop-filter:b
 #log{padding:22px 24px;scroll-behavior:smooth}
 .msg{border-radius:18px;padding:11px 15px;line-height:1.5;box-shadow:0 1px 0 rgba(255,255,255,.03) inset;animation:pop .25s ease}
 .user{background:linear-gradient(135deg,#5b47e0,#7c5cff);color:#fff;border-bottom-right-radius:6px}
-.bot{background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:6px;backdrop-filter:blur(6px)}
+.bot{max-width:min(620px,92%);background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:6px;backdrop-filter:blur(6px)}
 .guard{font:12.5px 'JetBrains Mono',ui-monospace,monospace;border-radius:12px;padding:8px 12px;border-width:1px;animation:pop .25s ease}
 .deny{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.45);color:#fecaca}
 .allow{background:rgba(52,211,153,.09);border-color:rgba(52,211,153,.4);color:#bbf7d0}
@@ -122,6 +122,24 @@ form button{border-radius:14px;padding:0 24px;background:linear-gradient(135deg,
 .sc-card.bad b{color:#f87171}.sc-card.good b{color:#34d399}
 .sc-t{width:100%;border-collapse:collapse;font-size:12.5px}.sc-t td,.sc-t th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .sc-t th{color:var(--muted);font-weight:500}.ok{color:#34d399;font-weight:600}.no{color:#f87171}
+
+/* ---- plan card ---- */
+.ph{display:flex;gap:10px;align-items:center;margin-bottom:10px}.ph small{display:block;color:var(--muted);font-size:12px}
+.okdot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#10b981,#00c2a8);color:#fff;font-weight:700}
+.pr{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-weight:600;margin-bottom:12px}
+.pr .arr,.msum .arr{color:var(--muted);font-weight:400}
+.d{width:10px;height:10px;border-radius:50%;display:inline-block}.d.s{background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.25)}.d.e{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.25)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.k{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.03)}
+.k small{display:block;color:var(--muted);font-size:11.5px}.k b{display:block;font-size:18px;letter-spacing:-.01em;margin-top:2px}.k i{font-style:normal;color:var(--muted);font-size:11px}
+.k.hl{border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.08)}.k.hl b{color:#6ee7b7}
+.bud{margin-top:10px}.bt{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px}
+.bb{height:7px;border-radius:7px;background:rgba(255,255,255,.08)}.bb div{height:7px;border-radius:7px;background:linear-gradient(90deg,#34d399,#00c2a8)}
+/* ---- map summary overlay ---- */
+.msum{display:none;position:absolute;left:14px;top:14px;z-index:6;max-width:calc(100% - 90px);background:rgba(255,255,255,.96);color:#0f172a;border-radius:16px;padding:12px 14px;box-shadow:0 10px 30px rgba(15,23,42,.25);font:13px Inter,sans-serif;backdrop-filter:blur(6px)}
+.ms-route{display:flex;align-items:center;gap:6px;font-weight:700;flex-wrap:wrap}.msum .via{background:#eef2ff;color:#4338ca;border-radius:999px;padding:1px 8px;font-size:11.5px}
+.ms-kpi{display:flex;gap:16px;margin-top:8px}.ms-kpi b{display:block;font-size:16px}.ms-kpi small{color:#64748b;font-size:11px}
+.ms-alt{margin-top:6px;color:#64748b;font-size:11.5px}
 </style>
 </head>
 <body>
@@ -137,7 +155,7 @@ form button{border-radius:14px;padding:0 24px;background:linear-gradient(135deg,
 </div>
 <form id="f"><input id="q" placeholder="Plan a trip… e.g. Bengaluru to Coorg for 4 friends, 15 km/l, Rs 102.5, budget Rs 3000" autocomplete="off"><button>Send</button></form>
 <div class="note" id="note">Browser demo of Yatra's guardrails. In the real agent these checks run as Failproof AI policies (.failproofai/policies/yatra-policies.mjs) on every Claude Code tool call.</div></div>
-<aside class="right"><div class="mh"><b>🗺️ Live map</b><span id="mstat">offline map</span><input id="mkey" type="password" placeholder="Mappls static key"><button id="mconn">Use Mappls</button></div><div class="mapbox"><svg id="map" viewBox="0 0 340 460"></svg><div id="mmap"></div><div class="mctl" id="mctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><div class="sep"></div><button id="zfit" title="Fit route">⤢</button><button id="z3d" title="Tilt 3D">◭</button></div></div><div class="stopbox" id="stopbox" style="display:none"><input id="auto" placeholder="🔎 Mappls autosuggest: add a place"></div><div class="lg"><span><i class="dot" style="background:#10b981"></i>verified route</span><span><i class="dot" style="background:#f59e0b"></i>checking</span><span><i class="dot" style="background:#ef4444"></i>unguarded / blocked</span><span><i class="dot" style="background:#3b82f6"></i>start</span></div></aside></div>
+<aside class="right"><div class="mh"><b>🗺️ Live map</b><span id="mstat">offline map</span><input id="mkey" type="password" placeholder="Mappls static key"><button id="mconn">Use Mappls</button></div><div class="mapbox"><svg id="map" viewBox="0 0 340 460"></svg><div id="mmap"></div><div class="msum" id="msum"></div><div class="mctl" id="mctl"><button id="zin" title="Zoom in">+</button><button id="zout" title="Zoom out">−</button><div class="sep"></div><button id="zfit" title="Fit route">⤢</button><button id="z3d" title="Tilt 3D">◭</button></div></div><div class="stopbox" id="stopbox" style="display:none"><input id="auto" placeholder="🔎 Mappls autosuggest: add a place"></div><div class="lg"><span><i class="dot" style="background:#10b981"></i>verified route</span><span><i class="dot" style="background:#f59e0b"></i>checking</span><span><i class="dot" style="background:#ef4444"></i>unguarded / blocked</span><span><i class="dot" style="background:#10b981"></i>start pin</span><span><i class="dot" style="background:#ef4444"></i>destination flag</span><span><i class="dot" style="background:#6366f1"></i>stop</span></div></aside></div>
 <script>
 const CITIES={"Bengaluru":[12.9716,77.5946],"Mysuru":[12.2958,76.6394],"Coorg":[12.4244,75.7382],"Chikkamagaluru":[13.3161,75.7720],"Ooty":[11.4102,76.6950],"Coimbatore":[11.0168,76.9558],"Chennai":[13.0827,80.2707],"Pondicherry":[11.9416,79.8083],"Tirupati":[13.6288,79.4192],"Madurai":[9.9252,78.1198],"Kochi":[9.9312,76.2673],"Mangaluru":[12.9141,74.8560],"Hampi":[15.3350,76.4600],"Goa":[15.4909,73.8278],"Hyderabad":[17.3850,78.4867],"Pune":[18.5204,73.8567],"Mumbai":[19.0760,72.8777],"Delhi":[28.6139,77.2090],"Agra":[27.1767,78.0081],"Jaipur":[26.9124,75.7873]};
 const ROAD=1.3, log=document.getElementById('log');
@@ -147,13 +165,22 @@ function compute(p){let km=0;for(let i=1;i<p.stops.length;i++)km+=hav(CITIES[p.s
 function closest(n){n=n.toLowerCase();return Object.keys(CITIES).map(c=>[c,[...c.toLowerCase()].filter((ch,i)=>n[i]===ch).length]).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // Trace events (Failproof decisions, tool calls) are kept out of the chat and shown behind an ⓘ button.
-let TRACE=[];
+let TRACE=[],TURN=[];
+function shipTurn(){if(!TURN.length)return;const body=JSON.stringify({sessionId:'yatra-'+Date.now(),events:TURN});TURN=[];
+  fetch((location.protocol.startsWith('http')?'':'http://localhost:4173')+'/api/trace',{method:'POST',headers:{'Content-Type':'application/json'},body})
+  .then(r=>r.json().then(j=>toast(r.ok?'📤 written for Failproof: '+j.msg:'⚠ Failproof SDK error: '+j.msg,r.ok)).catch(()=>toast('⚠ server is the old version: restart node server.mjs',false))).catch(()=>toast('⚠ Not sent to Failproof: start the server (node server.mjs)',false));}
+function toast(m,ok){const t=document.createElement('div');t.textContent=m;t.style.cssText=`position:fixed;left:20px;bottom:20px;z-index:60;padding:10px 14px;border-radius:12px;font:600 13px Inter,sans-serif;color:#fff;background:${ok?'#065f46':'#7f1d1d'};box-shadow:0 8px 24px rgba(0,0,0,.4)`;document.body.appendChild(t);setTimeout(()=>t.remove(),4000);}
+function turnEv(cls,html){const txt=String(html).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  if(cls.includes('user'))TURN.push({type:'user',text:txt});else if(cls.includes('bot'))TURN.push({type:'bot',text:txt.slice(0,400)});
+  else{const m=txt.match(/(yatra-[a-z-]+)\s*·\s*(ALLOW|DENY)/i);if(m)TURN.push({type:'policy',name:m[1],decision:m[2].toLowerCase(),text:txt});
+    else TURN.push({type:/Mappls|route/i.test(txt)?'route':'tool',name:/route_eta|Route ETA|road/i.test(txt)?'mappls.route_eta':'route.mjs',text:txt,failed:/unavailable/.test(txt)});}}
 function add(cls,html){
+  try{turnEv(cls,html);}catch(e){}
   if(cls.startsWith('guard')){TRACE.push({cls,html,t:new Date().toLocaleTimeString()});liveStatus();return document.createElement('div');}
   const d=document.createElement('div');d.className=cls;d.innerHTML=html;
   if(cls.includes('bot')&&TRACE.length){const ev=TRACE;TRACE=[];const blocked=ev.filter(e=>e.cls.includes('deny')).length;
     const b=document.createElement('button');b.className='tbtn'+(blocked?' hasblock':'');b.title='View Failproof trace';
-    b.innerHTML=`ⓘ <span>${ev.length} step${ev.length>1?'s':''}${blocked?` · ${blocked} blocked`:''}</span>`;b.onclick=()=>openTrace(ev);d.appendChild(b);}
+    b.innerHTML=`ⓘ <span>${ev.length} step${ev.length>1?'s':''}${blocked?` · ${blocked} blocked`:''}</span>`;b._ev=ev;b.onclick=()=>openTrace(b._ev);d.appendChild(b);}
   log.appendChild(d);log.scrollTop=log.scrollHeight;liveStatus();return d;}
 function liveStatus(){const el=document.getElementById('live');if(!el)return;
   if(TRACE.length){el.style.display='flex';el.innerHTML=`<span class="spin"></span> Failproof checking… ${TRACE.length} step${TRACE.length>1?'s':''}`;}else el.style.display='none';}
@@ -206,7 +233,13 @@ async function mapplsFind(q){
   }catch(e){}}
   return best||(anyOk?{notFound:true}:null);}
 function agentWith(text,name,full){agent(text.replace(new RegExp('\\b'+name+'\\b','i'),full.replace(',','')));}
-async function agent(text){
+async function agent(text){try{return await agentInner(text);}finally{
+  if(TRACE.length){const ev=TRACE;TRACE=[];const bots=log.querySelectorAll('.bot');const d=bots[bots.length-1];
+    if(d){let b=d.querySelector('.tbtn');if(!b){b=document.createElement('button');b.className='tbtn';d.appendChild(b);}
+      const all=(b._ev||[]).concat(ev);b._ev=all;const bl=all.filter(e=>e.cls.includes('deny')).length;b.className='tbtn'+(bl?' hasblock':'');
+      b.innerHTML=`ⓘ <span>${all.length} step${all.length>1?'s':''}${bl?` · ${bl} blocked`:''}</span>`;b.onclick=()=>openTrace(all);}liveStatus();}
+  shipTurn();}}
+async function agentInner(text){
   add('msg user',esc(text));
   const p=parse(text);
   baseMap();mClear();showStops(p.stops);
@@ -273,14 +306,9 @@ async function agent(text){
   }
   if(p.budget){await sleep(300);add('guard allow',`🛡 Failproof · yatra-budget-guard · ALLOW (₹${r.totalCost} ≤ ₹${p.budget})`);}
   await sleep(400);
-  redraw(p,'#3ee0b5');flash('✅ verified route','#3ee0b5');
+  redraw(p,'#3ee0b5');mFinalPins(p,r);mSummary(p,r);flash('✅ verified route','#3ee0b5');
   add('guard allow',`🛡 Failproof · yatra-summary-matches-plan · ALLOW (reply quotes ₹${r.totalCost} / ₹${r.perPerson}, same as trips/plan.json)`);
-  add('msg bot',`✅ Verified plan saved to trips/plan.json<div class="plan">
-<div><span>Route</span><b>${p.stops.join(' → ')}${p.round?' → '+p.stops[0]:''}</b></div>
-<div><span>Distance</span><b>${r.distanceKm} km${p._road?' by road':''}</b></div>${r.mins?`<div><span>Drive time</span><b>${fmtDur(r.mins)}</b></div>`:''}
-<div><span>Fuel needed</span><b>${r.litres} L</b></div>
-<div><span>Total fuel cost</span><b>₹${r.totalCost.toLocaleString('en-IN')}</b></div>
-<div><span>Per person (${p.people})</span><b>₹${r.perPerson.toLocaleString('en-IN')}</b></div></div>`);
+  add('msg bot',`<div class="ph"><span class="okdot">✓</span><div><b>Verified plan</b><small>saved to trips/plan.json · checked by Failproof</small></div></div><div class="pr"><span class="d s"></span>${p.stops.map(esc).join('<span class="arr">→</span>')}${p.round?'<span class="arr">→</span>'+esc(p.stops[0]):''}<span class="d e"></span></div><div class="kpis"> <div class="k"><small>Distance</small><b>${r.distanceKm} km</b><i>${p._road?'Mappls road route':'estimate'}</i></div> ${r.mins?`<div class="k"><small>Drive time</small><b>${fmtDur(r.mins)}</b><i>fastest route</i></div>`:''} <div class="k"><small>Fuel</small><b>${r.litres} L</b><i>${p.mileage} km/l · ₹${p.price}/l</i></div> <div class="k hl"><small>Total cost</small><b>₹${r.totalCost.toLocaleString('en-IN')}</b><i>₹${r.perPerson.toLocaleString('en-IN')} × ${p.people} ${p.people>1?'people':'person'}</i></div></div>${p.budget?`<div class="bud"><div class="bt"><span>Budget used</span><span>₹${Math.round(r.totalCost).toLocaleString('en-IN')} / ₹${p.budget.toLocaleString('en-IN')}</span></div><div class="bb"><div style="width:${Math.min(100,Math.round(100*r.totalCost/p.budget))}%"></div></div></div>`:''}`);
 }
 const SVGNS='http://www.w3.org/2000/svg',MAP=document.getElementById('map');
 const proj=([lat,lon])=>[20+(lon-72)/(81.5-72)*300, 440-(lat-8)/(29.5-8)*420];
@@ -317,7 +345,6 @@ async function connectMappls(key){MTOKEN=key;
     document.getElementById('map').style.display='none';const d=document.getElementById('mmap');d.style.display='block';
     MM=new mappls.Map('mmap',{center:[15.5,78.5],zoom:4.6,zoomControl:false,fullscreenControl:false,geolocation:false,location:false,search:false,traffic:false});
     await new Promise(r=>{try{MM.on('load',r);}catch(e){r();}setTimeout(r,5000);});
-    try{if(typeof mappls.setStyle==='function')mappls.setStyle(MAP_STYLE,MM);}catch(e){}
     wireCtl();gReady();
     st.textContent='✅ Mappls · Jade Green'+(VIA_SERVER?' · token from .env':'');
     try{ // Autosuggest plugin: pick a place to add it to the request
@@ -347,30 +374,52 @@ function gReady(){if(!MM||!MM.getSource)return false;try{
    L({id:'yt-pt',type:'circle',source:'yt',filter:['==',['get','k'],'pt'],paint:{'circle-radius':7.5,'circle-color':['get','c'],'circle-stroke-color':'#ffffff','circle-stroke-width':3}});
    L({id:'yt-lbl',type:'symbol',source:'yt',filter:['==',['get','k'],'pt'],layout:{'text-field':['get','n'],'text-size':12.5,'text-offset':[0,1.5],'text-anchor':'top','text-allow-overlap':true},paint:{'text-color':['get','tc'],'text-halo-color':'#ffffff','text-halo-width':2}});}
   return true;}catch(e){return false;}}
-function gPush(){if(!gReady())return false;const f=[...FEAT.pts];
-  (FEAT.alts||[]).forEach(a=>f.push(a));if(FEAT.route)f.push(FEAT.route);if(FEAT.label)f.push(FEAT.label);if(FEAT.fake)f.push(FEAT.fake);
-  try{MM.getSource('yt').setData({type:'FeatureCollection',features:f});return true;}catch(e){return false;}}
+function gPush(){return false;} // GeoJSON layers disabled: drawing uses mappls.Polyline/Marker
 const ptF=(n,[lat,lng],c,tc)=>({type:'Feature',properties:{k:'pt',n,c,tc:tc||'#0f172a'},geometry:{type:'Point',coordinates:[lng,lat]}});
 const lnF=(pts,k,c)=>({type:'Feature',properties:{k,c},geometry:{type:'LineString',coordinates:pts.map(([a,b])=>[b,a])}});
-function mPin(name,[lat,lng]){if(!MM)return;FEAT.pts=FEAT.pts.filter(p=>p.properties.n!==name);
-  FEAT.pts.push(ptF(name,[lat,lng],FEAT.pts.length?C.stop:C.start));
-  if(!gPush()){try{mLayers.push(new mappls.Marker({map:MM,position:{lat,lng},popupHtml:'<b>📍 '+name+'</b>'}));}catch(e){}}
+// ---- modern custom markers (SVG) ----
+function pinSvg(kind,label){
+  const C2={start:['#10b981','#047857'],end:['#ef4444','#b91c1c'],via:['#6366f1','#4338ca'],block:['#64748b','#334155'],tmp:['#f59e0b','#b45309']}[kind]||['#6366f1','#4338ca'];
+  const glyph=kind==='start'?'<circle cx="20" cy="18" r="6" fill="#fff"/><circle cx="20" cy="18" r="2.6" fill="'+C2[0]+'"/>'
+   :kind==='end'?'<path d="M16 11v15" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M17 11h9l-2.5 3.5L26 18h-9z" fill="#fff"/>'
+   :kind==='block'?'<path d="M15 13l10 10M25 13L15 23" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+   :'<text x="20" y="22.5" text-anchor="middle" font-family="Inter,Arial" font-weight="700" font-size="12" fill="#fff">'+(label||'')+'</text>';
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C2[0]}"/><stop offset="1" stop-color="${C2[1]}"/></linearGradient><filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".35"/></filter></defs>
+   <ellipse cx="20" cy="49" rx="7" ry="2.2" fill="#000" opacity=".22"/>
+   <path filter="url(#s)" d="M20 2C10.6 2 3.5 9 3.5 18c0 11.6 13.6 26.3 15.4 28.2a1.5 1.5 0 0 0 2.2 0C22.9 44.3 36.5 29.6 36.5 18 36.5 9 29.4 2 20 2z" fill="url(#g)" stroke="#fff" stroke-width="2.5"/>${glyph}</svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);}
+function popupHtml(kind,name,extra){const t={start:'Start',end:'Destination',via:'Stop',block:'Blocked by Failproof',tmp:'Checking'}[kind];
+  return `<div style="font:13px Inter,Arial;min-width:140px"><div style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:${kind==='block'?'#b91c1c':'#64748b'}">${t}</div><b style="font-size:14px">${esc(name)}</b>${extra?`<div style="color:#475569;margin-top:3px">${extra}</div>`:''}</div>`;}
+let pinLayers=[];
+function clearPins(){pinLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){}});pinLayers=[];}
+function addPin(kind,name,[lat,lng],label,extra){if(!MM)return;try{
+  const m=new mappls.Marker({map:MM,position:{lat,lng},icon:pinSvg(kind,label),width:40,height:52,offset:[0,-24],popupHtml:popupHtml(kind,name,extra),fitbounds:false});
+  pinLayers.push(m);mLayers.push(m);}catch(e){try{const m=new mappls.Marker({map:MM,position:{lat,lng},popupHtml:popupHtml(kind,name,extra)});pinLayers.push(m);mLayers.push(m);}catch(_){}}}
+function mPin(name,[lat,lng]){if(!MM)return;addPin('tmp',name,[lat,lng],'•');
   try{MM.flyTo({center:[lng,lat],zoom:Math.max(MM.getZoom?MM.getZoom():6,6),duration:700});}catch(e){}}
-function mBlocked(name,pos){if(!MM)return;FEAT.pts.push(ptF('✕ '+name+' (blocked)',pos,C.block,'#b91c1c'));
-  if(!gPush()){try{mLayers.push(new mappls.Marker({map:MM,position:{lat:pos[0],lng:pos[1]},popupHtml:'<b style="color:#d00">✕ '+name+'</b><br>blocked by Failproof'}));}catch(e){}}}
-function mRoute(pts,color,dashed){if(!MM)return;lastFit=pts;
-  const c=color==='#e03131'?C.bad:(color==='#12b886'?C.ok:color);
-  if(dashed)FEAT.fake=lnF(pts,'fake',C.bad);else FEAT.route=lnF(pts,'route',c);
-  if(!gPush()){try{mLayers.push(new mappls.Polyline({map:MM,path:pts.map(([lat,lng])=>({lat,lng})),strokeColor:c,strokeWeight:dashed?3:6}));}catch(e){}}
-  fitTo(pts);}
-function mClear(){FEAT.pts=[];FEAT.route=null;FEAT.fake=null;FEAT.alts=[];FEAT.label=null;gPush();if(!MM)return;mLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){}});mLayers=[];
+function mBlocked(name,pos){if(!MM)return;addPin('block',name,pos,'','Not a verified place');}
+// final markers: start, numbered stops, destination
+function mFinalPins(p,r){if(!MM)return;clearPins();const st=p.stops;
+  st.forEach((n,i)=>{const kind=i===0?'start':(i===st.length-1&&!p.round?'end':'via');
+    addPin(kind,n,CITIES[n],String(i),i===0&&r?`${r.distanceKm} km · ${r.mins?fmtDur(r.mins):''}`:'');});
+  if(p.round)addPin('end',st[0]+' (return)',[CITIES[st[0]][0]-0.0006,CITIES[st[0]][1]+0.0006]);}
+function mSummary(p,r){const el=document.getElementById('msum');if(!el)return;
+  if(!p){el.style.display='none';return;}
+  el.innerHTML=`<div class="ms-route"><span class="d s"></span>${esc(p.stops[0])}<span class="arr">→</span>${p.stops.length>2?`<span class="via">+${p.stops.length-2} stop${p.stops.length>3?'s':''}</span><span class="arr">→</span>`:''}<span class="d e"></span>${esc(p.round?p.stops[0]:p.stops[p.stops.length-1])}</div>
+   <div class="ms-kpi"><div><b>${r.distanceKm}</b><small>km${p._road?' by road':''}</small></div>${r.mins?`<div><b>${fmtDur(r.mins)}</b><small>drive</small></div>`:''}<div><b>₹${Math.round(r.totalCost).toLocaleString('en-IN')}</b><small>fuel</small></div><div><b>₹${Math.round(r.perPerson).toLocaleString('en-IN')}</b><small>each</small></div></div>
+   ${p._road&&p._road.alts.length?`<div class="ms-alt">+ ${p._road.alts.length} alternative route${p._road.alts.length>1?'s':''} in grey</div>`:''}`;
+  el.style.display='block';}
+function mRoute(pts,color,dashed){if(!MM)return;lastFit=pts;if(!dashed)clearRoute();poly(pts,dashed?'#ef4444':color,dashed?3:5,dashed?0.85:1);fitTo(pts);}
+function mClear(){if(MM){clearRoute();clearPins();}mSummary(null);FEAT.pts=[];FEAT.route=null;FEAT.fake=null;FEAT.alts=[];FEAT.label=null;gPush();if(!MM)return;mLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){}});mLayers=[];
   try{if(mDir&&mDir.remove)mDir.remove();}catch(e){}mDir=null;document.querySelectorAll('#mmap [class*="direction"],#mmap [id*="direction"]').forEach(n=>{try{n.remove();}catch(e){}});}
-function mRouteRoad(pts,c,road,final){if(!MM)return;lastFit=pts;
-  FEAT.route=lnF(pts,'route',c);
-  FEAT.alts=(road&&final?road.alts:[]).map(a=>lnF(a.coords.map(([lng,lat])=>[lat,lng]),'alt','#94a3b8'));
-  const mid=pts[Math.floor(pts.length/2)];
-  FEAT.label=road?{type:'Feature',properties:{k:'lbl',t:`${road.best.km} km · ${fmtDur(road.best.min)}`},geometry:{type:'Point',coordinates:[mid[1],mid[0]]}}:null;
-  if(!gPush()){try{mLayers.push(new mappls.Polyline({map:MM,path:pts.map(([lat,lng])=>({lat,lng})),strokeColor:c,strokeWeight:6}));}catch(e){}}
+let routeLayers=[];
+function clearRoute(){routeLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){try{l.remove&&l.remove();}catch(_){}}});routeLayers=[];}
+function poly(pts,color,w,op){try{const l=new mappls.Polyline({map:MM,path:pts.map(([lat,lng])=>({lat,lng})),strokeColor:color,strokeWeight:w,strokeOpacity:op,fitbounds:false});routeLayers.push(l);return l;}catch(e){console.log('[Yatra] polyline failed',e);}}
+function mRouteRoad(pts,c,road,final){if(!MM)return;lastFit=pts;clearRoute();
+  if(road&&final)road.alts.forEach(a=>poly(a.coords.map(([lng,lat])=>[lat,lng]),'#94a3b8',5,0.8));
+  poly(pts,c,14,0.25);          // glow
+  poly(pts,'#ffffff',9,1);      // casing
+  poly(pts,c,5,1);              // route
   fitTo(pts);}
 // rounded map controls
 function wireCtl(){const g=id=>document.getElementById(id);g('mctl').style.display='flex';
@@ -446,7 +495,8 @@ async function roadRoute(pts){
   // 2) JSONP, exactly like the "Mappls ai testing" project
   if(tok&&!routes.length){const j=await jsonp(base);if(!j)why.push('jsonp: no response');else{routes=normRoutes(j);if(!routes.length)why.push('jsonp: '+JSON.stringify(j).slice(0,120));}}
   // 3) local server proxy (http://localhost:4173)
-  if(!routes.length&&VIA_SERVER){try{const r=await fetch('/api/route?coords='+encodeURIComponent(key));if(r.ok)routes=normRoutes(await r.json());else why.push('server '+r.status);}catch(e){why.push('server unreachable');}}
+  const SRV=VIA_SERVER?'':'http://localhost:4173';
+  if(!routes.length){try{const r=await fetch(SRV+'/api/route?coords='+encodeURIComponent(key));if(r.ok)routes=normRoutes(await r.json());else why.push('server '+r.status);}catch(e){why.push('server unreachable');}}
   routes.sort((x,y)=>x.min-y.min);
   ROAD_WHY=why.join(' · ');try{console.log('[Yatra] Mappls route:',routes.length?'ok':'failed',ROAD_WHY);}catch(e){}
   const out=routes.length?{best:routes[0],alts:routes.slice(1)}:null;
@@ -464,7 +514,7 @@ function zoomTo(pts){const xy=pts.map(proj);let x0=Math.min(...xy.map(p=>p[0]))-
 function redraw(p,color){
   const road=p._road&&p._road.best?p._road.best.coords.map(([lng,lat])=>[lat,lng]):null;
   const line=road||routePts(p);
-  if(MM){if(road){const c=color==='#3ee0b5'?C.ok:C.check;FEAT.fake=null;mRouteRoad(line,c,p._road,color==='#3ee0b5');}else{FEAT.route=null;FEAT.alts=[];FEAT.label=null;FEAT.fake=lnF(line,'fake','#94a3b8');gPush();fitTo(line);}}
+  if(MM){if(road){const c=color==='#3ee0b5'?C.ok:C.check;FEAT.fake=null;mRouteRoad(line,c,p._road,color==='#3ee0b5');}else{clearRoute();poly(line,'#94a3b8',4,0.9);fitTo(line);}}
   zoomTo([...routePts(p),...(window._blocked||[])]);layerG.querySelectorAll('path').forEach(x=>x.remove());drawRoute(layerG,road?line.filter((_,k)=>k%Math.ceil(line.length/300)===0||k===line.length-1):line,color,false);
   if(road){[...layerG.querySelectorAll('circle')].forEach(c=>{if(!c.style.animation)c.remove();});routePts(p).forEach((pt,i)=>{const [x,y]=proj(pt);el('circle',{cx:x,cy:y,r:i?5:6,fill:color,stroke:'#0b0c10','stroke-width':1.5},layerG);});}}
 function showStops(stops){stops.forEach(n=>{if(!CITIES[n])return;const [x,y]=proj(CITIES[n]);const c=el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:'#ffcc4d','stroke-width':2},layerG);c.style.animation='pulse 1s ease 2';});}

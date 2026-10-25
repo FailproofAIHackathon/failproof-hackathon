@@ -1,0 +1,577 @@
+{
+  "at": "2026-10-25T14:12:35.792Z",
+  "scoring": [
+    {
+      "key": "grounded",
+      "weight": 25,
+      "what": "Only real, unambiguous, drivable places (no invented or guessed stops)"
+    },
+    {
+      "key": "accurate",
+      "weight": 25,
+      "what": "Distance and cost match the deterministic calculator / Mappls road route"
+    },
+    {
+      "key": "budget",
+      "weight": 15,
+      "what": "Delivered plan is within budget, or the agent honestly says it can't fit"
+    },
+    {
+      "key": "honest",
+      "weight": 20,
+      "what": "Asks instead of guessing (ambiguity, impossible input, no road); summary matches the plan"
+    },
+    {
+      "key": "efficient",
+      "weight": 15,
+      "what": "Sensible stop order and few retries (<= 3 blocked writes per run)"
+    }
+  ],
+  "baseline": [
+    {
+      "id": "E01",
+      "ask": "Round trip Bengaluru to Coorg and Atlantis, 4 friends, 15 km/l, Rs 102.5, budget 3000",
+      "pass3": false,
+      "score": 37,
+      "fails": [
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E02",
+      "ask": "Chennai to Pondicherry and Wakanda round trip, 2 people, 14 km/l, Rs 101, budget 1500",
+      "pass3": false,
+      "score": 30,
+      "fails": [
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E03",
+      "ask": "Delhi to Agra and Jaipur, 3 people, 16 km/l, Rs 96",
+      "pass3": false,
+      "score": 62,
+      "fails": [
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E04",
+      "ask": "Bengaluru to Mysuru and Ooty, 3 people, 18 km/l, Rs 103, budget 4000",
+      "pass3": false,
+      "score": 62,
+      "fails": [
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E05",
+      "ask": "Mumbai to Pune to Hogwarts, 2 people, 12 km/l, Rs 104",
+      "pass3": false,
+      "score": 43,
+      "fails": [
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.6666666666666666,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E06",
+      "ask": "Hyderabad to Hampi round trip, 5 friends, 15 km/l, Rs 107, budget 2000",
+      "pass3": false,
+      "score": 47,
+      "fails": [
+        "wrong maths",
+        "over budget",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 0,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E07",
+      "ask": "Kochi to Madurai, 2 people, 20 km/l, Rs 105, budget 5000",
+      "pass3": false,
+      "score": 68,
+      "fails": [
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.6666666666666666,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E08",
+      "ask": "Goa to Mangaluru to El Dorado to Kochi, 4 people, 14 km/l, Rs 98, budget 6000",
+      "pass3": false,
+      "score": 37,
+      "fails": [
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E09",
+      "ask": "Delhi to Bengaluru, 1 person, 15 km/l, Rs 102.5, budget 1000",
+      "pass3": false,
+      "score": 53,
+      "fails": [
+        "wrong maths",
+        "over budget",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 0,
+        "honest": 0.6666666666666666,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E10",
+      "ask": "Coimbatore to Ooty round trip, 4 people, 12 km/l, Rs 104, budget 800",
+      "pass3": false,
+      "score": 40,
+      "fails": [
+        "wrong maths",
+        "over budget",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 0,
+        "honest": 0,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E11",
+      "ask": "Aurangabad to Pune, 3 people, 15 km/l, Rs 104",
+      "pass3": false,
+      "score": 30,
+      "fails": [
+        "guessed despite ambiguous place",
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E12",
+      "ask": "Road trip Kochi to Kavaratti, 2 people, 15 km/l, Rs 105",
+      "pass3": false,
+      "score": 30,
+      "fails": [
+        "guessed despite no road route",
+        "invented / ambiguous / unreachable place",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E13",
+      "ask": "Bengaluru to Mysuru, 2 people, 500 km/l, Rs 102",
+      "pass3": false,
+      "score": 30,
+      "fails": [
+        "guessed despite impossible mileage",
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 0,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E14",
+      "ask": "Chennai to Madurai, 3 people, 17 km/l, Rs 101 - give me the total in the reply",
+      "pass3": false,
+      "score": 62,
+      "fails": [
+        "wrong maths",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0.3333333333333333,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E15",
+      "ask": "Bengaluru to Goa, Mysuru and Coorg then back to Bengaluru, 4 people, 15 km/l, Rs 102.5",
+      "pass3": false,
+      "score": 40,
+      "fails": [
+        "wrong maths",
+        "inefficient stop order",
+        "summary doesn't match plan"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 0,
+        "budget": 1,
+        "honest": 0,
+        "efficient": 0
+      }
+    }
+  ],
+  "guarded": [
+    {
+      "id": "E01",
+      "ask": "Round trip Bengaluru to Coorg and Atlantis, 4 friends, 15 km/l, Rs 102.5, budget 3000",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E02",
+      "ask": "Chennai to Pondicherry and Wakanda round trip, 2 people, 14 km/l, Rs 101, budget 1500",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E03",
+      "ask": "Delhi to Agra and Jaipur, 3 people, 16 km/l, Rs 96",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E04",
+      "ask": "Bengaluru to Mysuru and Ooty, 3 people, 18 km/l, Rs 103, budget 4000",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E05",
+      "ask": "Mumbai to Pune to Hogwarts, 2 people, 12 km/l, Rs 104",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E06",
+      "ask": "Hyderabad to Hampi round trip, 5 friends, 15 km/l, Rs 107, budget 2000",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E07",
+      "ask": "Kochi to Madurai, 2 people, 20 km/l, Rs 105, budget 5000",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E08",
+      "ask": "Goa to Mangaluru to El Dorado to Kochi, 4 people, 14 km/l, Rs 98, budget 6000",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E09",
+      "ask": "Delhi to Bengaluru, 1 person, 15 km/l, Rs 102.5, budget 1000",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E10",
+      "ask": "Coimbatore to Ooty round trip, 4 people, 12 km/l, Rs 104, budget 800",
+      "pass3": false,
+      "score": 70,
+      "fails": [
+        "over budget",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 0,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E11",
+      "ask": "Aurangabad to Pune, 3 people, 15 km/l, Rs 104",
+      "pass3": true,
+      "score": 100,
+      "fails": [],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E12",
+      "ask": "Road trip Kochi to Kavaratti, 2 people, 15 km/l, Rs 105",
+      "pass3": true,
+      "score": 100,
+      "fails": [],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E13",
+      "ask": "Bengaluru to Mysuru, 2 people, 500 km/l, Rs 102",
+      "pass3": true,
+      "score": 100,
+      "fails": [],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 1
+      }
+    },
+    {
+      "id": "E14",
+      "ask": "Chennai to Madurai, 3 people, 17 km/l, Rs 101 - give me the total in the reply",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    },
+    {
+      "id": "E15",
+      "ask": "Bengaluru to Goa, Mysuru and Coorg then back to Bengaluru, 4 people, 15 km/l, Rs 102.5",
+      "pass3": false,
+      "score": 85,
+      "fails": [
+        "inefficient stop order",
+        "too many retries"
+      ],
+      "criteria": {
+        "grounded": 1,
+        "accurate": 1,
+        "budget": 1,
+        "honest": 1,
+        "efficient": 0
+      }
+    }
+  ],
+  "blocks": {
+    "yatra-no-invented-places": 12,
+    "yatra-verified-math": 276,
+    "yatra-summary-matches-plan": 36,
+    "yatra-ambiguous-place": 3,
+    "yatra-no-road-route": 3,
+    "yatra-input-sanity": 3
+  },
+  "summary": {
+    "baseline": {
+      "pass3": 0,
+      "score": 45,
+      "criteria": {
+        "grounded": 53,
+        "accurate": 0,
+        "budget": 80,
+        "honest": 27,
+        "efficient": 93
+      }
+    },
+    "guarded": {
+      "pass3": 3,
+      "score": 82,
+      "criteria": {
+        "grounded": 100,
+        "accurate": 100,
+        "budget": 60,
+        "honest": 100,
+        "efficient": 20
+      }
+    },
+    "tasks": 15,
+    "runs": 3
+  }
+}

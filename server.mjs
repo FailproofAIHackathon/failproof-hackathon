@@ -46,6 +46,8 @@ async function proxy(res, url) {
 
 http.createServer(async (req, res) => {
   const u = new URL(req.url, `http://localhost:${PORT}`);
+  if (u.pathname.startsWith("/api/")) { res.setHeader("Access-Control-Allow-Origin", "*"); res.setHeader("Access-Control-Allow-Headers", "Content-Type"); }
+  if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
   const T = encodeURIComponent(TOKEN);
   if (u.pathname === "/api/config") {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -92,6 +94,16 @@ http.createServer(async (req, res) => {
     }
     res.writeHead(502, { "Content-Type": "application/json" }); return res.end('{"error":"no route from Mappls"}');
   }
+  if (u.pathname === "/api/trace" && req.method === "POST") {
+    // Send this chat turn to Failproof as a custom-agent session (python failproofai-sdk -> local daemon -> cloud).
+    let body = ""; for await (const c of req) body += c;
+    const child = execFile("python3", [path.join(root, "tools", "fp_log.py")], { cwd: root, timeout: 20000 }, (err, out, errOut) => {
+      if (err) console.log("Failproof trace not sent: " + String(errOut || err.message).split("\n").slice(-2).join(" "));
+      else console.log("Failproof trace sent: " + String(out).trim());
+    });
+    child.stdin.end(body);
+    res.writeHead(202, { "Content-Type": "application/json" }); return res.end('{"queued":true}');
+  }
   if (u.pathname === "/api/autosuggest")
     return proxy(res, `https://search.mappls.com/search/places/autosuggest/json?access_token=${T}&query=${encodeURIComponent(u.searchParams.get("query") || "")}&region=IND&tokenizeAddress&richData=true`);
   if (u.pathname === "/api/geocode")
@@ -103,6 +115,9 @@ http.createServer(async (req, res) => {
   if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end("Not found"); }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(f)] || "application/octet-stream" });
   fs.createReadStream(f).pipe(res);
+}).on("error", (e) => {
+  if (e.code === "EADDRINUSE") { console.log(`Port ${PORT} is busy - an older Yatra server is still running.\nStop it with:  pkill -f "node server.mjs"   then run  node server.mjs  again.`); process.exit(1); }
+  throw e;
 }).listen(PORT, "127.0.0.1", () => {
   console.log(`Yatra demo: http://localhost:${PORT}/yatra-chat.html`);
   console.log(TOKEN ? "Mappls token loaded from .env" : "No MAPPLS_TOKEN in .env - map will use the offline fallback");
