@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yatra Live Demo</title>
+<style>
+:root{--bg:#0b0c10;--panel:#14161e;--line:#2a2d3a;--text:#eef0f6;--muted:#9aa0b4;--pink:#ff4f9a;--ok:#3ee0b5;--warn:#ffcc4d;--bad:#ff5d6c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:22px}h1 small{color:var(--muted);font-weight:400;font-size:14px;margin-left:8px}
+.mk{margin-left:auto;display:flex;gap:6px;align-items:center}.mk input{width:220px;padding:7px 10px;font-size:12px}.mk button{background:#1f6feb;color:#fff;border:0;border-radius:8px;padding:7px 10px;font-size:12px;cursor:pointer}#mstat{font-size:12px;color:var(--muted)}
+#mmap{flex:1;min-height:380px;display:none}
+.stopbox{display:flex;gap:8px;padding:0 20px 8px}.stopbox input{max-width:420px;padding:9px;font-size:13px}
+.toggle{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.toggle button{background:none;border:0;color:var(--muted);padding:8px 16px;font:600 14px system-ui;cursor:pointer}
+.toggle button.on{background:var(--ok);color:#06231b}.toggle button.off.on{background:var(--bad);color:#2a0a0e}.toggle button.both.on{background:var(--pink);color:#fff}
+main{flex:1;display:grid;grid-template-columns:1fr 340px 1fr;gap:14px;padding:14px 20px;min-height:0}
+main.single{grid-template-columns:1fr 340px}
+.mapc{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column}
+.mapc h2{margin:0;padding:12px 16px;font-size:15px;border-bottom:1px solid var(--line)}
+#map{flex:1;width:100%;min-height:380px}
+.lg{font-size:12px;color:var(--muted);padding:8px 14px;border-top:1px solid var(--line)}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes pulse{0%{r:6}50%{r:12}100%{r:6}}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:420px;max-height:calc(100vh - 230px)}
+.col h2{margin:0;padding:12px 16px;font-size:15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%}.col.g .dot{background:var(--ok)}.col.u .dot{background:var(--bad)}
+.log{flex:1;overflow-y:auto;padding:12px 14px}
+.msg{margin:8px 0;padding:9px 13px;border-radius:12px;max-width:92%}.user{background:#2b2f45;margin-left:auto}.bot{background:#1b1e29;border:1px solid var(--line)}
+.ev{font:12.5px ui-monospace,Consolas,monospace;border-radius:9px;padding:7px 11px;margin:6px 0}
+.deny{background:#2a1418;border:1px solid var(--bad);color:#ffb3bb}.allow{background:#10251f;border:1px solid var(--ok);color:#a9f5e0}.tool{background:#1d1b10;border:1px solid var(--warn);color:#ffe9a8}
+.plan{border:1px solid var(--ok);border-radius:10px;padding:8px 12px;margin-top:8px;background:#0f1a17}.plan.badp{border-color:var(--bad);background:#1c1013}
+.plan div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed var(--line)}.plan div:last-child{border:0}
+.score{padding:10px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.bar{padding:0 20px 8px;display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:12.5px;border:1px solid var(--line);border-radius:16px;padding:5px 11px;color:var(--muted);cursor:pointer;background:none}
+.chip:hover{color:var(--text);border-color:var(--pink)}
+form{display:flex;gap:8px;padding:0 20px 16px}input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:13px;font:inherit}
+form button{background:var(--pink);color:#fff;border:0;border-radius:10px;padding:0 20px;font-weight:700;cursor:pointer}
+@media(max-width:1000px){main,main.single{grid-template-columns:1fr}.col{max-height:none}}
+</style></head><body>
+<header><h1>🛣️ Yatra<small>road-trip agent that can't hallucinate</small></h1>
+<div class="mk"><input id="mkey" type="password" placeholder="Mappls static key (stays in this browser)"><button id="mconn">Use Mappls map</button><span id="mstat"></span></div>
+<div class="toggle"><button class="both on" data-m="both">Side by side</button><button class="on1" data-m="on">Failproof ON</button><button class="off" data-m="off">Failproof OFF</button></div></header>
+<main id="main">
+<section class="col g" id="colG"><h2><span class="dot"></span>With Failproof AI policies</h2><div class="log" id="logG"></div><div class="score" id="scG">Every plan is checked before it is written.</div></section>
+<section class="mapc"><h2>🗺️ Live route map</h2><svg id="map" viewBox="0 0 340 460"></svg><div id="mmap"></div><div class="lg"><span style="color:#3ee0b5">━</span> verified (Failproof) &nbsp; <span style="color:#ff5d6c">┅</span> unguarded LLM &nbsp; <span style="color:#ff5d6c">✕</span> blocked place</div></section>
+<section class="col u" id="colU"><h2><span class="dot"></span>Without Failproof (plain LLM agent)</h2><div class="log" id="logU"></div><div class="score" id="scU">Simulated typical LLM behaviour: nothing checks the plan.</div></section>
+</main>
+<div class="bar">
+<button class="chip">Round trip Bengaluru to Coorg and Atlantis for 4 friends, 15 km/l, Rs 102.5, budget Rs 3000</button>
+<button class="chip">Bengaluru to Mysuru and Ooty for 3 people, 18 km/l, Rs 103, budget Rs 4000</button>
+<button class="chip">Chennai to Pondicherry and Wakanda round trip, 2 people, 14 km/l, Rs 101, budget Rs 1500</button>
+</div>
+<div class="stopbox" id="stopbox" style="display:none"><input id="auto" placeholder="🔎 Mappls autosuggest: search a place to add to your request"></div>
+<form id="f"><input id="q" placeholder="Ask Yatra… e.g. Bengaluru to Hampi for 3 friends, 16 km/l, Rs 103, budget Rs 2500" autocomplete="off"><button>Plan</button></form>
+<script>
+const CITIES={"Bengaluru":[12.9716,77.5946],"Mysuru":[12.2958,76.6394],"Coorg":[12.4244,75.7382],"Chikkamagaluru":[13.3161,75.7720],"Ooty":[11.4102,76.6950],"Coimbatore":[11.0168,76.9558],"Chennai":[13.0827,80.2707],"Pondicherry":[11.9416,79.8083],"Tirupati":[13.6288,79.4192],"Madurai":[9.9252,78.1198],"Kochi":[9.9312,76.2673],"Mangaluru":[12.9141,74.8560],"Hampi":[15.3350,76.4600],"Goa":[15.4909,73.8278],"Hyderabad":[17.3850,78.4867],"Pune":[18.5204,73.8567],"Mumbai":[19.0760,72.8777],"Delhi":[28.6139,77.2090],"Agra":[27.1767,78.0081],"Jaipur":[26.9124,75.7873]};
+const ROAD=1.3;const hav=([a,b],[c,d])=>{const r=x=>x*Math.PI/180;const h=Math.sin(r(c-a)/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(r(d-b)/2)**2;return 2*6371*Math.asin(Math.sqrt(h));};
+function compute(p){let km=0;for(let i=1;i<p.stops.length;i++)km+=hav(CITIES[p.stops[i-1]],CITIES[p.stops[i]])*ROAD;if(p.round)km*=2;const d=Math.round(km*10)/10,l=d/p.mileage,t=Math.round(l*p.price*100)/100;return{distanceKm:d,litres:Math.round(l*100)/100,totalCost:t,perPerson:Math.round(t/p.people*100)/100};}
+function closest(n){n=n.toLowerCase();return Object.keys(CITIES).map(c=>[c,[...c.toLowerCase()].filter((ch,i)=>n[i]===ch).length]).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms)),esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])),INR=n=>'₹'+Number(n).toLocaleString('en-IN');
+function add(log,cls,h){const d=document.createElement('div');d.className=cls;d.innerHTML=h;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+function parse(t){const num=(re,def)=>{const m=t.match(re);return m?parseFloat(m[1]):def;};
+ const p={mileage:num(/(\d+(?:\.\d+)?)\s*km\s*\/\s*l/i,15),price:num(/(?:rs\.?|₹)\s*(\d+(?:\.\d+)?)(?![^,]*budget)/i,102.5),people:num(/(\d+)\s*(?:friends|people|persons|travellers|travelers|pax)/i,1),budget:num(/budget\s*(?:of\s*)?(?:rs\.?|₹)?\s*(\d+(?:\.\d+)?)/i,0),round:/round/i.test(t)};
+ const stop=new Set(['Round','Trip','Plan','For','Budget','Rs','A','From','To','And','Via','The','Me','Please','People','Friends']);
+ p.stops=[...new Set((t.match(/\b[A-Z][a-zA-Z]+\b/g)||[]).filter(w=>!stop.has(w)))];return p;}
+const planCard=(p,r,bad)=>`<div class="plan ${bad?'badp':''}"><div><span>Route</span><b>${p.stops.join(' → ')}${p.round?' → '+p.stops[0]:''}</b></div><div><span>Distance</span><b>${r.dist}</b></div><div><span>Total fuel cost</span><b>${r.cost}</b></div><div><span>Per person (${p.people})</span><b>${r.pp}</b></div></div>`;
+async function guarded(text){const L=document.getElementById('logG'),S=document.getElementById('scG');let blocks=0;
+ add(L,'msg user',esc(text));const p=parse(text);await sleep(300);
+ if(p.stops.length<2){add(L,'msg bot','Tell me at least two places, e.g. "Bengaluru to Coorg".');return;}
+ const bad=p.stops.filter(s=>!CITIES[s]);
+ if(bad.length){bad.forEach((b,i)=>markBlocked(b,i));flash('🛡 Failproof blocked: '+bad.join(', '),'#ff5d6c');blocks++;add(L,'ev deny',`🛡 yatra-no-invented-places · DENY<br>${esc(bad.join(', '))} is not a verified place. Did you mean ${closest(bad[0]).join(', ')}?`);await sleep(500);
+  p.stops=p.stops.filter(s=>CITIES[s]);add(L,'msg bot',`I couldn't verify ${esc(bad.join(', '))}, so I left it out.`);if(p.stops.length<2){add(L,'msg bot','Not enough verified places to plan a route.');return;}await sleep(400);}
+ else add(L,'ev allow','🛡 yatra-no-invented-places · ALLOW');
+ const tool=()=>add(L,'ev tool',`⚙ node tools/route.mjs --stops ${p.stops.join(',')} --mileage ${p.mileage} --price ${p.price} --people ${p.people}${p.round?' --round':''}`);
+ tool();let r=compute(p);layerG.querySelectorAll('path').forEach(x=>x.remove());drawRoute(layerG,[...p.stops,...(p.round?[p.stops[0]]:[])].map(n=>CITIES[n]),'#ffcc4d',false);await sleep(500);add(L,'ev allow',`🛡 yatra-verified-math · ALLOW (${INR(r.totalCost)} matches calculator)`);
+ while(p.budget&&r.totalCost>p.budget){await sleep(400);blocks++;add(L,'ev deny',`🛡 yatra-budget-guard · DENY<br>${INR(r.totalCost)} is over the ${INR(p.budget)} budget.`);
+  if(p.round){p.round=false;add(L,'msg bot','Over budget. Trying it one-way.');}else if(p.stops.length>2){add(L,'msg bot',`Still over. Dropping ${p.stops.pop()}.`);}
+  else{add(L,'msg bot',`Even one-way costs ${INR(r.totalCost)}. I won't give you a plan you can't afford.`);S.textContent=`Blocked ${blocks} bad plan(s). No unsafe plan was delivered.`;return;}
+  await sleep(400);tool();r=compute(p);flash('🛡 over budget: re-routing','#ffcc4d');layerG.querySelectorAll('path').forEach(x=>x.remove());drawRoute(layerG,[...p.stops,...(p.round?[p.stops[0]]:[])].map(n=>CITIES[n]),'#ffcc4d',false);}
+ if(p.budget){await sleep(300);add(L,'ev allow',`🛡 yatra-budget-guard · ALLOW (${INR(r.totalCost)} ≤ ${INR(p.budget)})`);}
+ await sleep(400);layerG.querySelectorAll('path').forEach(x=>x.remove());drawRoute(layerG,[...p.stops,...(p.round?[p.stops[0]]:[])].map(n=>CITIES[n]),'#3ee0b5',false);mRoute([...p.stops,...(p.round?[p.stops[0]]:[])].map(n=>CITIES[n]),'#12b886',false);mDirections(p.stops);flash('✅ verified route','#3ee0b5');add(L,'msg bot','✅ Verified plan'+planCard(p,{dist:r.distanceKm+' km',cost:INR(r.totalCost),pp:INR(r.perPerson)}));
+ S.textContent=`Blocked ${blocks} bad plan(s) · delivered 1 verified plan · ${INR(r.totalCost)} exact.`;}
+async function unguarded(text){const L=document.getElementById('logU'),S=document.getElementById('scU');
+ add(L,'msg user',esc(text));const p=parse(text);await sleep(500);if(p.stops.length<2){add(L,'msg bot','Sure! Where to?');return;}
+ const ok=p.stops.filter(s=>CITIES[s]),fake=p.stops.filter(s=>!CITIES[s]);const real=ok.length>1?compute({...p,stops:ok}):{distanceKm:0,totalCost:0};
+ layerU.innerHTML='';let fi=0;const upts=p.stops.map(n=>CITIES[n]||fakePos(fi++));if(p.round)upts.push(upts[0]);drawRoute(layerU,upts,'#ff5d6c',true);mRoute(upts,'#e03131',true);
+ const km=Math.round(real.distanceKm+fake.length*(p.round?440:220));const guess=Math.round(km/p.mileage*p.price/100)*100*0.9;
+ add(L,'msg bot','✅ Here is your plan! Have a great trip 🎉'+planCard(p,{dist:'~'+km+' km',cost:'about '+INR(guess),pp:'about '+INR(Math.round(guess/p.people))},true));
+ await sleep(400);const issues=[];if(fake.length)issues.push(`Invented place: <b>${esc(fake.join(', '))}</b> got made-up distances`);
+ issues.push(`Cost was <b>guessed</b>${ok.length>1?` (real cost for the real places: ${INR(real.totalCost)})`:''}`);
+ if(p.budget&&guess>p.budget)issues.push(`${INR(guess)} is <b>over the ${INR(p.budget)} budget</b>, and nothing stopped it`);
+ add(L,'ev deny','⚠ What went wrong:<br>• '+issues.join('<br>• '));S.textContent=`${issues.length} problem(s) shipped to the user.`;}
+
+const SVGNS='http://www.w3.org/2000/svg',MAP=document.getElementById('map');
+const proj=([lat,lon])=>[20+(lon-72)/(81.5-72)*300, 440-(lat-8)/(29.5-8)*420];
+function el(t,a,parent=MAP){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);parent.appendChild(e);return e;}
+function baseMap(){MAP.innerHTML='';
+ el('rect',{x:0,y:0,width:340,height:460,fill:'#10131b'});
+ for(let i=0;i<=8;i++){el('line',{x1:0,x2:340,y1:i*57,y2:i*57,stroke:'#1b2030'});el('line',{y1:0,y2:460,x1:i*42,x2:i*42,stroke:'#1b2030'});}
+ for(const [n,c] of Object.entries(CITIES)){const [x,y]=proj(c);el('circle',{cx:x,cy:y,r:3.2,fill:'#5b6178'});const t=el('text',{x:x+5,y:y+3,fill:'#7d849c','font-size':8.5});t.textContent=n;}
+ window.layerU=el('g',{});window.layerG=el('g',{});}
+const fakePos=(i)=>[12.0-i*1.1,73.2-i*0.4]; // invented places appear in the sea
+function drawRoute(layer,pts,color,dashed){const d=pts.map((p,i)=>(i?'L':'M')+proj(p).join(',')).join(' ');
+ const path=el('path',{d,fill:'none',stroke:color,'stroke-width':dashed?2:3.2,'stroke-linecap':'round','stroke-linejoin':'round'},layer);
+ const len=path.getTotalLength();path.style.strokeDasharray=dashed?'6 5':len;path.style.strokeDashoffset=dashed?0:len;
+ if(!dashed)path.style.animation='draw 1.4s ease forwards';else{path.style.opacity=0;path.animate([{opacity:0},{opacity:1}],{duration:900,fill:'forwards'});}
+ pts.forEach((p,i)=>{const [x,y]=proj(p);el('circle',{cx:x,cy:y,r:i?5:6,fill:color,stroke:'#0b0c10','stroke-width':1.5},layer);});}
+function markBlocked(name,i){mBlocked(name,fakePos(i));const [x,y]=proj(fakePos(i));const g=el('g',{},layerG);
+ const c=el('circle',{cx:x,cy:y,r:7,fill:'none',stroke:'#ff5d6c','stroke-width':2},g);c.style.animation='pulse 1s ease 3';
+ el('text',{x:x-4,y:y+4,fill:'#ff5d6c','font-size':13,'font-weight':700},g).textContent='✕';
+ el('text',{x:x+10,y:y+4,fill:'#ff9aa5','font-size':9},g).textContent=name+' (blocked)';}
+function flash(msg,color){const t=el('text',{x:170,y:22,fill:color,'font-size':11,'text-anchor':'middle','font-weight':700});t.textContent=msg;setTimeout(()=>t.remove(),2200);}
+baseMap();
+
+// ---------- Mappls Web SDK (optional, live) ----------
+let MM=null, mLayers=[];
+function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc);});}
+async function connectMappls(key){
+  const st=document.getElementById('mstat');st.textContent='loading Mappls…';
+  try{
+    await loadScript('https://sdk.mappls.com/map/sdk/web?v=3.0&access_token='+encodeURIComponent(key));
+    try{await loadScript('https://sdk.mappls.com/map/sdk/plugins?v=3.0&access_token='+encodeURIComponent(key));}catch(e){}
+    document.getElementById('map').style.display='none';const d=document.getElementById('mmap');d.style.display='block';
+    MM=new mappls.Map('mmap',{center:{lat:13.2,lng:77.2},zoom:6});
+    st.textContent='✅ Mappls map live';
+    try{ // Autosuggest plugin
+      document.getElementById('stopbox').style.display='flex';
+      mappls.search(document.getElementById('auto'),{region:'IND',height:300},function(data){
+        const r=Array.isArray(data)?data[0]:data; if(!r)return;
+        const name=r.placeName||r.placeAddress||''; const q=document.getElementById('q');
+        q.value=(q.value?q.value+' and ':'')+name; document.getElementById('auto').value='';});
+    }catch(e){document.getElementById('stopbox').style.display='none';}
+  }catch(e){st.textContent='⚠ Mappls SDK failed to load, using offline map';MM=null;}
+}
+function mClear(){if(!MM)return;mLayers.forEach(l=>{try{mappls.remove({map:MM,layer:l});}catch(e){}});mLayers=[];}
+function mRoute(pts,color,dashed){if(!MM)return;try{
+  mLayers.push(new mappls.Polyline({map:MM,path:pts.map(([lat,lng])=>({lat,lng})),strokeColor:color,strokeWeight:dashed?3:6,strokeOpacity:dashed?0.7:1,fitbounds:true}));
+  pts.forEach(([lat,lng])=>mLayers.push(new mappls.Marker({map:MM,position:{lat,lng}})));}catch(e){}}
+function mBlocked(name,pos){if(!MM)return;try{mLayers.push(new mappls.Marker({map:MM,position:{lat:pos[0],lng:pos[1]},popupHtml:'<b style="color:#d00">✕ '+name+'</b><br>blocked by Failproof',popupOptions:{openPopup:true}}));}catch(e){}}
+function mDirections(stops){if(!MM)return;try{ // Direction plugin: real road route for the verified plan
+  const a=CITIES[stops[0]],b=CITIES[stops[stops.length-1]];
+  mappls.direction({map:MM,start:{label:stops[0],geoposition:a[0]+','+a[1]},end:{label:stops[stops.length-1],geoposition:b[0]+','+b[1]},
+    via:stops.slice(1,-1).map(n=>({label:n,geoposition:CITIES[n][0]+','+CITIES[n][1]}))},function(){});}catch(e){}}
+(function(){const k=document.getElementById('mkey');try{k.value=localStorage.getItem('mapplsKey')||'';}catch(e){}
+ document.getElementById('mconn').onclick=()=>{const v=k.value.trim();if(!v)return;try{localStorage.setItem('mapplsKey',v);}catch(e){}connectMappls(v);};})();
+let mode='both';
+function setMode(m){mode=m;document.querySelectorAll('.toggle button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+ document.getElementById('colG').style.display=m==='off'?'none':'';document.getElementById('colU').style.display=m==='on'?'none':'';document.getElementById('main').classList.toggle('single',m!=='both');}
+document.querySelectorAll('.toggle button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+function run(t){baseMap();mClear();if(mode!=='off')guarded(t);if(mode!=='on')unguarded(t);}
+document.getElementById('f').onsubmit=e=>{e.preventDefault();const q=document.getElementById('q');if(q.value.trim()){run(q.value.trim());q.value='';}};
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>run(c.textContent));
+add(document.getElementById('logG'),'msg bot','Hi, I am Yatra 🛣️ Every plan I write is checked by Failproof AI.');
+add(document.getElementById('logU'),'msg bot','Hi! I am a trip planner. Ask me anything!');
+</script></body></html>
