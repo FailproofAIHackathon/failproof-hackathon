@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Fuel Cost Calculator</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1b2333;
+      --muted: #667085;
+      --border: #dfe3ec;
+      --accent: #2563eb;
+      --accent-soft: #e8efff;
+      --error: #d92d20;
+      --radius: 14px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1420;
+        --card: #182031;
+        --text: #e8ecf4;
+        --muted: #98a2b3;
+        --border: #2a3448;
+        --accent: #5b8cff;
+        --accent-soft: #1e2a47;
+        --error: #f97066;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+    main { width: 100%; max-width: 480px; }
+    header { margin-bottom: 20px; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    header p { margin: 0; color: var(--muted); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(16, 24, 40, 0.06);
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    input.invalid { border-color: var(--error); }
+    .check {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .error { color: var(--error); font-size: 0.85rem; min-height: 1.2em; margin: 12px 0 0; }
+    .results { display: grid; gap: 12px; margin-top: 16px; }
+    .result {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+    }
+    .result span:first-child { color: var(--muted); font-size: 0.9rem; }
+    .result strong { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+    .result.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .result.primary span:first-child { color: rgba(255,255,255,.85); }
+    .result.primary strong { font-size: 1.5rem; }
+    .note { color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 16px; }
+    @media (max-width: 400px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>⛽ Trip Fuel Cost Calculator</h1>
+      <p>Estimate fuel and split the cost with your fellow travellers.</p>
+    </header>
+
+    <form class="card" id="form" novalidate>
+      <div class="grid">
+        <div class="field full">
+          <label for="distance">Distance (km, one way)</label>
+          <input type="number" id="distance" min="0" step="any" inputmode="decimal" placeholder="e.g. 350" value="350" />
+        </div>
+        <div class="field">
+          <label for="mileage">Mileage (km/l)</label>
+          <input type="number" id="mileage" min="0" step="any" inputmode="decimal" placeholder="e.g. 15" value="15" />
+        </div>
+        <div class="field">
+          <label for="price">Fuel price (₹/litre)</label>
+          <input type="number" id="price" min="0" step="any" inputmode="decimal" placeholder="e.g. 102.5" value="102.5" />
+        </div>
+        <div class="field full">
+          <label for="travellers">Number of travellers</label>
+          <input type="number" id="travellers" min="1" step="1" inputmode="numeric" placeholder="e.g. 4" value="4" />
+        </div>
+        <label class="check" for="roundTrip">
+          <input type="checkbox" id="roundTrip" />
+          Round trip (doubles the distance)
+        </label>
+      </div>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+
+    <section class="results" aria-live="polite">
+      <div class="result"><span>Total distance</span><strong id="outDistance">–</strong></div>
+      <div class="result"><span>Litres needed</span><strong id="outLitres">–</strong></div>
+      <div class="result primary"><span>Total fuel cost</span><strong id="outTotal">–</strong></div>
+      <div class="result"><span>Cost per person</span><strong id="outPerPerson">–</strong></div>
+    </section>
+
+    <p class="note">Estimates only — actual consumption varies with traffic, load and driving style.</p>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const inputs = ["distance", "mileage", "price", "travellers"].map($);
+    const roundTrip = $("roundTrip");
+
+    const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
+    const num = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
+
+    function clearResults() {
+      ["outDistance", "outLitres", "outTotal", "outPerPerson"].forEach((id) => ($(id).textContent = "–"));
+    }
+
+    function calculate() {
+      const [distance, mileage, price, travellers] = inputs.map((el) => parseFloat(el.value));
+      const errors = [];
+      inputs.forEach((el) => el.classList.remove("invalid"));
+
+      const check = (el, ok, msg) => { if (!ok) { el.classList.add("invalid"); errors.push(msg); } };
+      check(inputs[0], distance > 0, "Distance must be greater than 0.");
+      check(inputs[1], mileage > 0, "Mileage must be greater than 0.");
+      check(inputs[2], price > 0, "Fuel price must be greater than 0.");
+      check(inputs[3], Number.isInteger(travellers) && travellers >= 1, "Travellers must be a whole number of at least 1.");
+
+      const anyEmpty = inputs.some((el) => el.value.trim() === "");
+      if (errors.length) {
+        $("error").textContent = anyEmpty ? "Please fill in all fields." : errors[0];
+        clearResults();
+        return;
+      }
+      $("error").textContent = "";
+
+      const totalDistance = distance * (roundTrip.checked ? 2 : 1);
+      const litres = totalDistance / mileage;
+      const total = litres * price;
+
+      $("outDistance").textContent = `${num.format(totalDistance)} km`;
+      $("outLitres").textContent = `${num.format(litres)} L`;
+      $("outTotal").textContent = inr.format(total);
+      $("outPerPerson").textContent = inr.format(total / travellers);
+    }
+
+    $("form").addEventListener("input", calculate);
+    $("form").addEventListener("submit", (e) => e.preventDefault());
+    calculate();
+  </script>
+</body>
+</html>
